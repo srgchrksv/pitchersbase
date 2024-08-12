@@ -1,0 +1,93 @@
+.container {
+    display: flex;
+    /* Allow stacking elements vertically */
+    flex-direction: column;
+    /* Stack elements one over another */
+    align-items: center;
+    /* Center elements horizontally */
+    margin: 0 auto;
+    /* Center the container horizontally */
+    width: fit-content;
+    /* Adjust width if needed */
+    
+}
+
+.error,
+.input,
+.content,
+.rules,
+.competition {
+    margin-bottom: 1rem;
+    /* Add some space between elements */
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.error {
+    color: red;
+    /* Error message color */
+}
+
+.success {
+    color: rgb(0, 78, 30);
+}
+
+.input {
+    padding: 1rem;
+    /* Add padding to input and content */
+    border: 1px solid #ccc;
+    /* Add a border */
+    border-radius: 4px;
+    /* Rounded corners */
+}
+
+.content {
+    padding: 2rem;
+    /* Add padding to input and content */
+    border: 1px solid #ccc;
+    /* Add a border */
+    border-radius: 4px;
+    /* Rounded corners */
+}
+
+  
+.rules {
+    font-size: 1.2rem;
+    /* Make rules text 20% larger */
+    /* Other rules specific styles */
+}
+
+.competitions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 15px;
+  }
+
+.competition {
+    border: 1px solid #ddd;
+    /* Add border to each competition item */
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    /* Increase space between competitions */
+}
+
+.input,
+.content,
+.button {
+    min-width: 80vw;
+    /* Ensure width is at least half viewport or 100% */
+    box-sizing: border-box;
+    /* Include padding and border in width calculation */
+    margin-bottom: 1rem;
+}
+
+.button {
+    background-color: green;
+}

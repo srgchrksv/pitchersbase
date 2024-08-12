@@ -1,0 +1,36 @@
+.form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.title {
+    font-size: 1.2rem;
+    margin: 0.9rem;
+}
+
+.content {
+    padding: 0.2rem;
+    /* Add padding to input and content */
+    border: 1px solid #ccc;
+    /* Add a border */
+    border-radius: 4px;
+    
+    /* Rounded corners */
+}
+
+.input,
+.content,
+.button {
+    display: grid;
+    min-width: 30vw;
+    /* Ensure width is at least half viewport or 100% */
+    /* Include padding and border in width calculation */
+    margin-bottom: 1rem;
+}
+
+.button {
+    background-color: green;
+    margin: 0 auto;
+}

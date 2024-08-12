@@ -1,0 +1,15 @@
+{
+    "indexes": [
+      {
+        "collectionGroup": "submissions",
+        "queryScope": "COLLECTION",
+        "fields": [
+          { "fieldPath": "postId", "order": "ASCENDING" },
+          { "fieldPath": "score", "order": "DESCENDING" },
+          { "fieldPath" : "__name__", "order": "DESCENDING"}
+        ]
+      }
+      
+    ]
+  }
+  

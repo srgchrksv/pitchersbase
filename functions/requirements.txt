@@ -1,0 +1,4 @@
+firebase_functions
+firebase_admin
+google-generativeai
+python-dotenv

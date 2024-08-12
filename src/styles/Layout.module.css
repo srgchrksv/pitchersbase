@@ -1,0 +1,9 @@
+.layout {
+    min-height: 100vh !important;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .footer {
+    flex-grow: 1; /* Ensures footer takes up remaining space */
+  }
