@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
 import SubmissionSection from '../../components/SubmissionSection';
 import styles from '../../styles/Index.module.css'
+import competitionCardStyles from '../../styles/CompetitionCard.module.css'
 import CompetitionCard from '../../components/CompetitionCard';
 
 export default function BlogCompetition() {
@@ -31,7 +32,7 @@ export default function BlogCompetition() {
     <Layout>
       <div className={styles.index}>
       <article>
-        <CompetitionCard competition={competition} />
+        <CompetitionCard competition={competition} customStyles={competitionCardStyles} isSubstring={false} />
       </article>
       <SubmissionSection competition={competition} />
     </div>

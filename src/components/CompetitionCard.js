@@ -1,14 +1,15 @@
 import React from 'react';
 import Link from 'next/link'; // Assuming you're using Next.js
 import styles from '../styles/Index.module.css'
+import Image from 'next/image'
 
-const CompetitionCard = ({ competition }) => {
+const CompetitionCard = ({ competition, customStyles = {}, isSubstring = true }) => {
   return (
-    <div key={competition.id} className={styles.competition}>
+    <div key={competition.id} className={customStyles.competition || styles.competition}>
       <Link href={`/events/${competition.id}`}>
-        <img src={competition.imageUrl} alt={competition.title} className={styles.image}/>
-        <h2 className={styles.title}>{competition.title}</h2>
-        <p className={styles.content}>{competition.content.substring(0, 100)}...</p>
+        {competition.imageUrl && (<Image src={competition.imageUrl} width={500} height={500} alt={competition.title} className={customStyles.image || styles.image} />)}
+        <h2 className={customStyles.title || styles.title}>{competition.title}</h2>
+        <p className={customStyles.content || styles.content}>{isSubstring ? (competition.content.substring(0, 100) + '...') : (competition.content)}</p>
       </Link>
     </div>
   );

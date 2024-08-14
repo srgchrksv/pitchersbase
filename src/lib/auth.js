@@ -51,6 +51,17 @@ import {
     return userDoc.exists()
   };
   
+
+  export const checkAdminStatus = async (user, setIsAdmin) => {
+    try {
+      const result = await isAdmin(user);
+      setIsAdmin(result);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      // Handle error, e.g., set isAdmin to false or show an error message
+    }
+  };
+
   // Custom hook to get the current user
   export const useAuth = () => {
     const [user, setUser] = useState(null);

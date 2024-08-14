@@ -3,6 +3,7 @@ import { collection, addDoc, query, where, orderBy, getDocs } from 'firebase/fir
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { fetchData } from '@/scripts/fetch';
 import styles from '../styles/SubmissionSection.module.css'
 
 export default function SubmissionSection({ competition }) {
@@ -10,56 +11,41 @@ export default function SubmissionSection({ competition }) {
   const [newSubmission, setNewSubmission] = useState('');
   const user = useAuth();
   const postId = competition.id
-  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false)
   const [scores, setScores] = useState([]);
   const fileInputRef = useRef(null);
 
   async function fetchScores() {
-    console.log(postId);
-    const requestBody = { postId: postId };
-  
     try {
+      const requestBody = { postId: postId };
       const response = await fetch('/api/getSortedScores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
-  
+
       const data = await response.json();
-      console.log(data);
       setScores(data);
     } catch (error) {
       console.error('Error fetching scores:', error);
-      // Handle error, e.g., display an error message to the user
     }
   }
 
-  async function fetchSubmissions () {
-    try {
-      const q = query(
-        collection(db, 'submissions'),
-        where('postId', '==', postId),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      const fetchedSubmissions = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setSubmissions(fetchedSubmissions);
-    } catch(error) {
-      console.error(error)
-    }
-  };
   useEffect(() => {
-  
 
     if (postId) {
-      fetchSubmissions();
+      fetchData({
+        db,
+        collectionName: 'submissions',
+        queryCondition: ['postId', '==', postId],
+        order: ['createdAt', 'desc'],
+        setData: setSubmissions,
+      });
       fetchScores();
     }
 
@@ -68,53 +54,52 @@ export default function SubmissionSection({ competition }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setSuccessMessage('')
     console.log('Form submitted');
+
     if (!user) {
       alert('You must be logged in to submit');
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
       return;
     }
 
-    if (!newSubmission.trim()) {
-      setIsLoading(false); // Reset loading state
-      return;
-    }
-
-    // Proceed with video upload or text submission...
     try {
       const videoFile = e.target.elements.video?.files[0];
-      if (videoFile) {
-        const storage = getStorage();
-        const videoRef = ref(storage, `submissions/${user.uid}-${Date.now()}.mp4`);
-        await uploadBytes(videoRef, videoFile);
-        const videoUrl = await getDownloadURL(videoRef);
+      const storage = getStorage();
+      const videoRef = ref(storage, `submissions/${user.uid}-${Date.now()}.mp4`);
+      await uploadBytes(videoRef, videoFile);
+      const videoUrl = await getDownloadURL(videoRef);
+      await addDoc(collection(db, 'submissions'), {
+        postId,
+        title: competition.title,
+        competitionRules: competition.competitionRules,
+        content: newSubmission,
+        author: user.email,
+        createdAt: new Date().toISOString(),
+        videoUrl
+      });
 
-        await addDoc(collection(db, 'submissions'), {
-          postId,
-          title: competition.title,
-          competitionRules: competition.competitionRules,
-          content: newSubmission,
-          author: user.email,
-          createdAt: new Date().toISOString(),
-          videoUrl
-        });
-      } else {
-        await addDoc(collection(db, 'submissions'), {
-          postId,
-          content: newSubmission,
-          author: user.email,
-          createdAt: new Date().toISOString()
-        });
-      }
+      // Clear form and reset state
+      setNewSubmission('');
+      fileInputRef.current.value = '';
+
+      // Fetch updated submissions
+      await fetchData({
+        db,
+        collectionName: 'submissions',
+        queryCondition: ['postId', '==', postId],
+        order: ['createdAt', 'desc'],
+        setData: setSubmissions,
+      });
+
+      console.log('Submission complete');
+      setSuccessMessage("Submitted sucessfully. Now Gemini will score your submission. To see your score on the leader board come back little bit later and refresh the page, give Gemini some time. For now you can watch your submision down below.")
     } catch (error) {
       console.error('Error submitting:', error);
       alert('Error submitting. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-    setNewSubmission('');
-    fileInputRef.current.value = '';
-    console.log('Submission complete');
   };
 
   return (
@@ -129,9 +114,11 @@ export default function SubmissionSection({ competition }) {
             placeholder="Write a submission description..."
             required
           />
+          <h4>Upload your video submission:</h4>
           <input type="file" name="video" accept="video/*" className={styles.fileInput} ref={fileInputRef} required />
           <button type="submit" className={styles.button}>Competition Submission</button>
           {isLoading && <span>Submitting...</span>}
+          {successMessage}
         </form>
       ) : (
         <p>Please log in to make your pitch.</p>
@@ -148,8 +135,8 @@ export default function SubmissionSection({ competition }) {
           </div>
         ))}
       </div>
-      <div>
-        <div className={styles.index}>
+      <div> 
+        {submissions.length >= 1 && <div className={styles.index}>
           <h1>Leader Board</h1>
           <table>
             <thead>
@@ -175,8 +162,8 @@ export default function SubmissionSection({ competition }) {
               )}
             </tbody>
           </table>
-        </div>
-        </div>
+        </div>}
+      </div>
     </div>
   );
 }

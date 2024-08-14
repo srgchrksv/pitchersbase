@@ -109,6 +109,9 @@ h1, h2, h3 {
   margin: 10px;
 }
 
+h4 {
+  color: silver;
+}
 p {
   color: grey;
 }

@@ -1,55 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { useAuth, isAdmin } from '../../lib/auth';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
+import { useAuth,  checkAdminStatus } from '../../lib/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { fetchData } from '@/scripts/fetch';
+import Layout from '../../components/Layout';
 import CompetitionCard from '../../components/CompetitionCard';
+import styles from '../../styles/Dashboard.module.css';
+
 
 export default function AdminDashboard() {
   const [competitions, setCompetitions] = useState([]);
-  const [newCompetition, setNewCompetition] = useState({ createdBy: '',  imageUrl: '', title: '', content: '', competitionRules: '' });
+  const [newCompetition, setNewCompetition] = useState({ createdBy: '', imageUrl: '', title: '', content: '', competitionRules: '' });
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(null); // Initial state: unknown
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); 
+  const fileInputRef = useRef(null);
   const user = useAuth();
- 
-
-  const checkAdmin = async () => {
-    const isAdminResult = await isAdmin(user);
-    if (!isAdminResult) {
-      return <Layout><div>You are not authorized...</div></Layout>;
-    }
-    return <div>Authorized content</div>;
-  };
-
-
-  const fetchCompetitions = async () => {
-    setIsLoading(true); 
-    try {
-      if (!user) {
-        console.error("User not found. Cannot fetch competitions.");
-        setIsLoading(false);
-        return;
-      }
-      const q = query(collection(db, "competitions"), where("createdBy", "==", user.uid));
-      const postsSnapshot = await getDocs(q);
-      const postsList = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setCompetitions(postsList);
-    } catch (err) {
-      console.error("Error fetching competitions:", err);
-      setError("Failed to fetch competitions. Please try again.");
-    } finally {
-      setIsLoading(false);  // Ensure loading state is reset
-    }
-  };
-  
 
   useEffect(() => {
-    if (user) {
-      fetchCompetitions();
+    setSuccessMessage("")
+    checkAdminStatus(user, setIsAdmin);
+    if (user && isAdmin) {
+      fetchData({
+        db,
+        collectionName: 'competitions',
+        queryCondition: ['createdBy', '==', user.uid],
+        setData: setCompetitions,
+        setError,
+      });
+
     }
   }, [user]);
 
@@ -57,12 +38,11 @@ export default function AdminDashboard() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setIsLoading(true); // Set loading state to true
 
     try {
       if (!user) {
         console.error("User not found. handleAddCompetition.");
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
       const newCompetitionData = {
@@ -91,8 +71,15 @@ export default function AdminDashboard() {
       console.log("Document written with ID: ", docRef.id);
 
       setNewCompetition({ createdBy: user.uid, imageUrl: '', title: '', content: '', competitionRules: '' });
-      await fetchCompetitions();  // Refresh competitions after adding
+      await fetchData({
+        db,
+        collectionName: 'competitions',
+        queryCondition: ['createdBy', '==', user.uid],
+        setData: setCompetitions,
+        setError,
+      });  // Refresh competitions after adding
       setSuccessMessage('Competition added successfully!');
+      fileInputRef.current.value = '';
     } catch (err) {
       console.error("Error adding competition:", err);
       setError(`Failed to add competition: ${err.message}`);
@@ -106,7 +93,13 @@ export default function AdminDashboard() {
     setError('');
     try {
       await deleteDoc(doc(db, 'competitions', id));
-      await fetchCompetitions();  // Refresh competitions after deleting
+      await fetchData({
+        db,
+        collectionName: 'competitions',
+        queryCondition: ['createdBy', '==', user.uid],
+        setData: setCompetitions,
+        setError,
+      });  // Refresh competitions after deleting
     } catch (err) {
       console.error("Error deleting competition:", err);
       setError(`Failed to delete competition: ${err.message}`);
@@ -116,17 +109,21 @@ export default function AdminDashboard() {
   };
 
   if (!user) return <Layout><div>Loading...</div></Layout>;
+ 
+  if(!isAdmin) return <Layout><div>You are not authorized...</div></Layout>; 
 
   return (
     <Layout>
+      
       <div className={styles.container}>
-        <h1>Admin Dashboard</h1>
-        {successMessage &&  <p className={styles.success}>{successMessage}</p>}
+        <h1>Catchers Dashboard</h1>
+        <h3>Create an event</h3>
+        {successMessage && <p className={styles.success}>{successMessage}</p>}
         {error && (
           <p className={styles.error}>{error}</p>
         )}
         <form onSubmit={handleAddCompetition} className={styles.form}>
-          <input type="file" name="image" accept="image/*" className={styles.input} />
+          <input ref={fileInputRef} type="file" name="image" accept="image/*" className={styles.input} />
           <input
             type="text"
             value={newCompetition.title}

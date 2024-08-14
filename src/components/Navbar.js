@@ -1,24 +1,14 @@
 import Link from 'next/link';
-import { useAuth, logOut, isAdmin } from '../lib/auth';
+import { useAuth, logOut, checkAdminStatus } from '../lib/auth';
 import styles from '../styles/Navbar.module.css';
 import { useState, useEffect } from 'react';
 
 
 export default function Navbar() {
   const user = useAuth();
-  const [admin, setIsAdmin] = useState(null); // Initial state: unknown
-
+  const [isAdmin, setIsAdmin] = useState(null);
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const result = await isAdmin(user);
-        setIsAdmin(result);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        // Handle error, e.g., set isAdmin to false or show an error message
-      }
-    };
-    checkAdminStatus();
+    checkAdminStatus(user, setIsAdmin);
   }, [user]);
 
   return (
@@ -27,10 +17,10 @@ export default function Navbar() {
       {user ? (
         <>
           <span>Welcome, {user.email}</span>
-          {admin ? (
+          {isAdmin ? (
             <Link href="/admin/dashboard"><span className={styles.adminDashboardLink}>Admin Dashboard</span></Link>
           ) : ("")}
-          <button onClick={logOut} className={styles.navButton}>Log out</button> 
+          <button onClick={logOut} className={styles.navButton}>Log out</button>
         </>
       ) : (
         <>

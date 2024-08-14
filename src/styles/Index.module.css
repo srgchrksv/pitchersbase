@@ -13,6 +13,11 @@
 
 }
 
+.siteTitle {
+  border-bottom: 1px solid wheat;
+  border-top: 1px solid wheat;
+}
+
 .competitions {
   display: flex;
   flex-wrap: wrap;

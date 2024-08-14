@@ -2,6 +2,8 @@
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
+// this one route is made to try the next.js server side processing
+
 export default async function handler(req, res) {
     try {
         // Extract the postId from query parameters

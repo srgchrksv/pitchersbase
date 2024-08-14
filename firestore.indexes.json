@@ -1,15 +1,25 @@
 {
-    "indexes": [
-      {
-        "collectionGroup": "submissions",
-        "queryScope": "COLLECTION",
-        "fields": [
-          { "fieldPath": "postId", "order": "ASCENDING" },
-          { "fieldPath": "score", "order": "DESCENDING" },
-          { "fieldPath" : "__name__", "order": "DESCENDING"}
-        ]
-      }
-      
-    ]
-  }
-  
+  "indexes": [
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" },
+        { "fieldPath" : "__name__", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "postId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath" : "__name__", "order": "DESCENDING"}
+      ]
+    }
+
+
+  ]
+}
+

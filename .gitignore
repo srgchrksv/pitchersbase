@@ -39,4 +39,4 @@ t
 .env*
 *.log
 .idx
-*firebase*
+.firebaserc
